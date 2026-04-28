@@ -1,0 +1,167 @@
+:root{
+    --blue:#003366;
+    --blue-dark:#002244;
+    --gold:#ffcc00;
+    --bg:#f4f7f6;
+    --text:#222;
+    --border:#dcdcdc;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background:var(--bg);
+    padding:30px;
+    display:flex;
+    justify-content:center;
+}
+
+.container{
+    width:100%;
+    max-width:900px;
+    background:#fff;
+    padding:32px;
+    border-radius:14px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+    border-top:8px solid var(--blue);
+}
+
+h1{
+    text-align:center;
+    color:var(--blue);
+    margin-bottom:30px;
+    font-size:34px;
+    font-weight:700;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+}
+
+.full-width{
+    grid-column:span 2;
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+}
+
+label{
+    font-size:14px;
+    font-weight:600;
+    color:var(--text);
+    margin-bottom:6px;
+}
+
+input,
+textarea,
+select{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    font-size:14px;
+    transition:0.25s;
+    background:#fff;
+}
+
+input:focus,
+textarea:focus,
+select:focus{
+    outline:none;
+    border-color:var(--blue);
+    box-shadow:0 0 0 3px rgba(0,51,102,0.08);
+}
+
+textarea{
+    min-height:95px;
+    resize:vertical;
+}
+
+button{
+    width:100%;
+    margin-top:25px;
+    padding:15px;
+    border:none;
+    border-radius:8px;
+    background:var(--blue);
+    color:#fff;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+    transition:0.25s;
+}
+
+button:hover{
+    background:var(--blue-dark);
+}
+
+#status{
+    margin-top:18px;
+    text-align:center;
+    font-weight:700;
+    color:var(--blue);
+}
+
+#fileList{
+    margin-top:14px;
+}
+
+.file-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    padding:10px 12px;
+    background:#f3f4f6;
+    border-radius:8px;
+    margin-bottom:8px;
+    font-size:14px;
+    word-break:break-word;
+}
+
+.remove-btn{
+    background:#d62828;
+    color:#fff;
+    border:none;
+    border-radius:6px;
+    padding:6px 10px;
+    cursor:pointer;
+    font-size:13px;
+    width:auto;
+}
+
+.remove-btn:hover{
+    background:#b71c1c;
+}
+
+@media(max-width:768px){
+
+    body{
+        padding:15px;
+    }
+
+    .container{
+        padding:22px;
+    }
+
+    .grid{
+        grid-template-columns:1fr;
+    }
+
+    .full-width{
+        grid-column:span 1;
+    }
+
+    h1{
+        font-size:28px;
+    }
+}

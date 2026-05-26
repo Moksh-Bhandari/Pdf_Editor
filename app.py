@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -6,6 +6,7 @@ import os
 import shutil
 import uuid
 import json
+import time
 
 from core.master_engine import finalize_portfolio_report
 
@@ -36,6 +37,27 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 # ======================================================
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
+
+# ======================================================
+# change 2.1
+# AUTO DELETE AFTER 1 MINUTE
+# ======================================================
+def delete_after_delay(files_list):
+    """
+    Wait 60 seconds then delete files.
+    """
+    time.sleep(60)
+
+    for file_path in files_list:
+        try:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                print("Deleted:", file_path)
+
+        except Exception as e:
+            print("Delete Error:", e)
+
+
 # ======================================================
 # HOME PAGE
 # ======================================================
@@ -50,11 +72,13 @@ async def home():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 # ======================================================
 # GENERATE REPORT
 # ======================================================
 @app.post("/generate-report")
 async def generate_report(
+    background_tasks: BackgroundTasks,
     student_data: str = Form(...),
     pdf_file: UploadFile = File(...),
     images: list[UploadFile] = File(default=[])
@@ -85,8 +109,14 @@ async def generate_report(
         with open(pdf_path, "wb") as buffer:
             shutil.copyfileobj(pdf_file.file, buffer)
 
+        # ==================================================
+        # change 2.2
+        # Close uploaded pdf handle after saving
+        # ==================================================
+        pdf_file.file.close()
+
         # ----------------------------------------------
-        # Save Unlimited Images
+        # Save Images
         # ----------------------------------------------
         image_paths = []
 
@@ -99,12 +129,18 @@ async def generate_report(
                 with open(img_path, "wb") as buffer:
                     shutil.copyfileobj(img.file, buffer)
 
+                # ==========================================
+                # change 2.2
+                # Close uploaded image handle after saving
+                # ==========================================
+                img.file.close()
+
                 image_paths.append(img_path)
 
         print("Total Images Received:", len(image_paths))
 
         # ----------------------------------------------
-        # Output PDF Path
+        # Output Path
         # ----------------------------------------------
         exp_no = data.get("exp_no", "X")
 
@@ -116,13 +152,24 @@ async def generate_report(
         )
 
         # ----------------------------------------------
-        # Generate Final PDF
+        # Generate PDF
         # ----------------------------------------------
         finalize_portfolio_report(
             pdf_path,
             output_path,
             data,
             image_paths
+        )
+
+        # ==================================================
+        # change 2.1
+        # Schedule delete after 60 sec
+        # ==================================================
+        files_to_delete = [pdf_path, output_path] + image_paths
+
+        background_tasks.add_task(
+            delete_after_delay,
+            files_to_delete
         )
 
         # ----------------------------------------------
@@ -136,6 +183,7 @@ async def generate_report(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 # ======================================================
 # RUN SERVER DIRECTLY

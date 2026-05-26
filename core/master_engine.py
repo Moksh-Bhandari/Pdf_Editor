@@ -297,19 +297,35 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
 
         final_y = max(current_y, 165)
 
+        # Bold label
+        target_page.insert_text(
+            (40.68, final_y + 12),
+            "Conclusion:",
+            fontsize=11,
+            fontname="tibo"
+        )
+
+        # Normal text
         conc_rect = fitz.Rect(
-            40.68,
+            110,
             final_y,
             550,
-            final_y + 80,
+            final_y + 80
         )
 
         target_page.insert_textbox(
             conc_rect,
-            f"Conclusion:\n{data['conclusion']}",
+            data["conclusion"],
             fontsize=11,
-            fontname="tiro",
+            fontname="tiro"
         )
+        
+        # ==================================================
+        # change 1.4
+        # Remove blank pages after conclusion page
+        # ==================================================
+        while len(doc) - 1 > curr_p_idx:
+            doc.delete_page(len(doc) - 1)
 
         # =====================================================
         # SAVE

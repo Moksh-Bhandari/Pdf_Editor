@@ -327,10 +327,24 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
         while len(doc) - 1 > curr_p_idx:
             doc.delete_page(len(doc) - 1)
 
-        # =====================================================
-        # SAVE
-        # =====================================================
-        doc.save(output_pdf, clean=True, deflate=True)
+        # ======================================================
+        # change 4.3
+        # ADVANCED PDF COMPRESSION
+        # ======================================================
+        doc.save(
+        output_pdf,
+        garbage=4,
+        clean=True,
+        deflate=True,
+        deflate_images=True,
+        deflate_fonts=True
+    )
+        
+
+        # change 4.2
+        # CLOSE PDF DOCUMENT PROPERLY
+        # ======================================================
+        doc.close()
 
         print(f"\n--- BUILD SUCCESSFUL: {output_pdf} ---")
 

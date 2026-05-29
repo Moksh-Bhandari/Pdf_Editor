@@ -1,10 +1,19 @@
 let selectedImages = [];
 
+// ======================================================
+// change 3.3.3
+// REQUEST LOCK
+// ======================================================
+let isGenerating = false;
+
 // ======================================
 // ELEMENTS
 // ======================================
 const imageInput = document.getElementById("images");
 const fileList = document.getElementById("fileList");
+const generateBtn = document.querySelector(
+    '#reportForm button[type=\"submit\"]'
+);
 
 // ======================================
 // IMAGE PICKER
@@ -63,8 +72,26 @@ document.getElementById("reportForm").onsubmit = async function (e) {
 
     e.preventDefault();
 
+    // ======================================================
+    // change 3.3.3
+    // BLOCK MULTIPLE CLICKS
+    // ======================================================
+    if (isGenerating) {
+        return;
+    }
+
+    isGenerating = true;
+
     const status = document.getElementById("status");
-    status.innerText = "Generating PDF...";
+
+    // ======================================================
+    // change 3.3.3
+    // START LOADING STATE
+    // ======================================================
+    generateBtn.disabled = true;
+    generateBtn.classList.add("disabled-btn");
+    generateBtn.innerText = "Generating PDF...";
+
 
     const formData = new FormData();
 
@@ -95,8 +122,37 @@ document.getElementById("reportForm").onsubmit = async function (e) {
     const pdfFile = document.getElementById("pdf_file").files[0];
 
     if (!pdfFile) {
+
         status.innerText = "Please upload APSIT template PDF.";
+
+        resetGenerateButton();
         return;
+    }
+
+    // ======================================================
+    // change 3.1 updated
+    // FILE SIZE VALIDATION
+    // ======================================================
+    const MAX_PDF_SIZE = 20 * 1024 * 1024; // 20 MB
+    const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB
+
+    if (pdfFile.size > MAX_PDF_SIZE) {
+
+        status.innerText = "PDF exceeds 20 MB limit.";
+
+        resetGenerateButton();
+        return;
+    }
+
+    for (const image of selectedImages) {
+
+        if (image.size > MAX_IMAGE_SIZE) {
+
+            status.innerText = `Image "${image.name}" exceeds 10 MB limit.`;
+
+            resetGenerateButton();
+            return;
+        }
     }
 
     formData.append("pdf_file", pdfFile);
@@ -136,5 +192,26 @@ document.getElementById("reportForm").onsubmit = async function (e) {
     } catch (error) {
 
         status.innerText = "Server Error.";
+
+    } finally {
+
+        // ======================================================
+        // change 3.3.3
+        // ALWAYS RESTORE BUTTON
+        // ======================================================
+        resetGenerateButton();
     }
 };
+
+// ======================================================
+// change 3.3.3
+// RESET BUTTON FUNCTION
+// ======================================================
+function resetGenerateButton() {
+
+    isGenerating = false;
+
+    generateBtn.disabled = false;
+    generateBtn.classList.remove("disabled-btn");
+    generateBtn.innerText = "Generate Report";
+}

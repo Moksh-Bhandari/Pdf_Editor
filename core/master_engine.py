@@ -10,8 +10,43 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
     try:
         doc = fitz.open(input_pdf)
 
-        HEADER_FLOOR = 155
-        FOOTER_CEILING = 750
+        HEADER_FLOOR = 145      # Everything above this remains untouched (Header protected)
+        FOOTER_CEILING = 750    # Everything below this remains untouched (Footer protected)
+
+        # =====================================================
+        # CHANGE 5.3
+        # SAFE EDITABLE REGION
+        # =====================================================
+
+        EDITABLE_LEFT = 35
+        EDITABLE_RIGHT = 600
+
+        # End just ABOVE the footer
+        EDITABLE_BOTTOM = 730
+
+        # =====================================================
+        # CHANGE 5.0 / 5.1
+        # PREPARE CONTINUATION PAGE
+        # =====================================================
+
+        def prepare_continuation_page(page):
+
+            editable_rect = fitz.Rect(
+                EDITABLE_LEFT,
+                HEADER_FLOOR,           # Consistent redaction start
+                EDITABLE_RIGHT,
+                EDITABLE_BOTTOM,
+            )
+
+            # Remove everything inside editable region only
+            page.add_redact_annot(
+                editable_rect,
+                fill=(1, 1, 1),
+            )
+
+            page.apply_redactions()
+
+            return page
 
         # =====================================================
         # change1.3 -> Reliable wrapping helper
@@ -128,23 +163,20 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
             page.clean_contents()
 
             if i == 0:
+                # Clear editable area only (Header & Footer untouched)
                 page.add_redact_annot(
-                    fitz.Rect(35, 155, 600, 230),
-                    fill=(1, 1, 1),
+                    fitz.Rect(
+                        35,
+                        HEADER_FLOOR,
+                        600,
+                        730,
+                    ),
+                    fill=(1,1,1),
                 )
 
-                page.add_redact_annot(
-                    fitz.Rect(35, 230, 600, 420),
-                    fill=(1, 1, 1),
-                )
-
-                page.add_redact_annot(
-                    fitz.Rect(35, 430, 600, FOOTER_CEILING),
-                    fill=(1, 1, 1),
-                )
             else:
                 page.add_redact_annot(
-                    fitz.Rect(35, 155, 600, FOOTER_CEILING),
+                    fitz.Rect(35, HEADER_FLOOR, 600, FOOTER_CEILING),
                     fill=(1, 1, 1),
                 )
 
@@ -187,7 +219,6 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
 
         aim_lines = wrap_text(data["aim"], 78)
 
-        first_line = True
         for line in aim_lines:
             x_pos = 78
             page1.insert_text(
@@ -197,7 +228,6 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
                 fontname="tiro",
             )
             current_y += 15
-            first_line = False
 
         current_y += 8
 
@@ -236,6 +266,7 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
         # IMAGE ENGINE
         # =====================================================
         curr_p_idx = 0
+        current_page = doc[curr_p_idx]
 
         for img_path in image_paths:
             if current_y + 280 > FOOTER_CEILING:
@@ -245,16 +276,11 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
                     doc.fullcopy_page(1)
 
                 target = doc[curr_p_idx]
-                target.clean_contents()
 
-                target.add_redact_annot(
-                    fitz.Rect(35, 155, 600, FOOTER_CEILING),
-                    fill=(1, 1, 1),
-                )
-
-                target.apply_redactions()
+                prepare_continuation_page(target)
 
                 current_y = 165
+                current_page = target
 
             img_rect = fitz.Rect(
                 50,
@@ -263,7 +289,7 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
                 current_y + 280,
             )
 
-            doc[curr_p_idx].insert_image(
+            current_page.insert_image(
                 img_rect,
                 filename=img_path,
                 keep_proportion=True,
@@ -274,21 +300,27 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
         # =====================================================
         # CONCLUSION
         # =====================================================
-        if current_y + 60 > FOOTER_CEILING:
+
+        conclusion_lines = wrap_text(
+            data.get("conclusion", ""),
+            65
+        )
+
+        required_height = (
+            len(conclusion_lines) * 15
+        ) + 35
+
+        # Move conclusion to next page if it won't fit
+        if current_y + required_height > FOOTER_CEILING:
+
             curr_p_idx += 1
 
             if curr_p_idx >= len(doc):
                 doc.fullcopy_page(1)
 
             target_page = doc[curr_p_idx]
-            target_page.clean_contents()
 
-            target_page.add_redact_annot(
-                fitz.Rect(35, 155, 600, FOOTER_CEILING),
-                fill=(1, 1, 1),
-            )
-
-            target_page.apply_redactions()
+            prepare_continuation_page(target_page)
 
             current_y = 165
 
@@ -305,17 +337,17 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
             fontname="tibo"
         )
 
-        # Normal text
+        # Wrapped conclusion text
         conc_rect = fitz.Rect(
             110,
             final_y,
             550,
-            final_y + 80
+            final_y + required_height
         )
 
         target_page.insert_textbox(
             conc_rect,
-            data["conclusion"],
+            "\n".join(conclusion_lines),
             fontsize=11,
             fontname="tiro"
         )
@@ -332,13 +364,13 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
         # ADVANCED PDF COMPRESSION
         # ======================================================
         doc.save(
-        output_pdf,
-        garbage=4,
-        clean=True,
-        deflate=True,
-        deflate_images=True,
-        deflate_fonts=True
-    )
+            output_pdf,
+            garbage=4,
+            clean=True,
+            deflate=True,
+            deflate_images=True,
+            deflate_fonts=True
+        )
         
 
         # change 4.2

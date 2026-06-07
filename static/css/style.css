@@ -104,11 +104,17 @@ button:hover{
     background:var(--blue-dark);
 }
 
+button:active{
+    transform:scale(0.98);
+}
+
 #status{
-    margin-top:18px;
+    margin-top:20px;
     text-align:center;
-    font-weight:700;
+    font-weight:600;
     color:var(--blue);
+    line-height:1.6;
+    min-height:28px;
 }
 
 #fileList{
@@ -126,6 +132,11 @@ button:hover{
     margin-bottom:8px;
     font-size:14px;
     word-break:break-word;
+    transition:0.2s;
+}
+
+.file-item:hover{
+    transform:translateY(-2px);
 }
 
 .remove-btn{

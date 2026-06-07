@@ -49,26 +49,34 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
             return page
 
         # =====================================================
-        # change1.3 -> Reliable wrapping helper
+        # Updated: Respect newlines + smart wrapping
         # =====================================================
         def wrap_text(text, max_chars):
-            words = str(text).split()
+            if not text:
+                return []
+            # Split by paragraphs (double newlines or single newlines)
+            paragraphs = str(text).replace('\r\n', '\n').split('\n')
             lines = []
-            current = ""
-
-            for word in words:
-                trial = word if current == "" else current + " " + word
-
-                if len(trial) <= max_chars:
-                    current = trial
-                else:
-                    if current:
-                        lines.append(current)
-                    current = word
-
-            if current:
-                lines.append(current)
-
+            
+            for para in paragraphs:
+                if not para.strip():
+                    lines.append("")  # Preserve blank lines
+                    continue
+                    
+                words = para.split()
+                current = ""
+                
+                for word in words:
+                    trial = word if current == "" else current + " " + word
+                    if len(trial) <= max_chars:
+                        current = trial
+                    else:
+                        if current:
+                            lines.append(current)
+                        current = word
+                if current:
+                    lines.append(current)
+            
             return lines
 
         # =====================================================

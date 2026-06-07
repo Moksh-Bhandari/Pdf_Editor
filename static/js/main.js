@@ -123,7 +123,7 @@ document.getElementById("reportForm").onsubmit = async function (e) {
 
     if (!pdfFile) {
 
-        status.innerText = "Please upload APSIT template PDF.";
+        status.innerText = "Please upload an APSIT template PDF.";
 
         resetGenerateButton();
         return;
@@ -138,7 +138,7 @@ document.getElementById("reportForm").onsubmit = async function (e) {
 
     if (pdfFile.size > MAX_PDF_SIZE) {
 
-        status.innerText = "PDF exceeds 20 MB limit.";
+        status.innerText = "📄 PDF size exceeds the 20 MB limit.";
 
         resetGenerateButton();
         return;
@@ -148,7 +148,7 @@ document.getElementById("reportForm").onsubmit = async function (e) {
 
         if (image.size > MAX_IMAGE_SIZE) {
 
-            status.innerText = `Image "${image.name}" exceeds 10 MB limit.`;
+            status.innerText = `🖼 "${image.name}" exceeds the 10 MB limit.`;
 
             resetGenerateButton();
             return;
@@ -176,12 +176,12 @@ document.getElementById("reportForm").onsubmit = async function (e) {
 
             const a = document.createElement("a");
             a.href = url;
-            a.download = "APSIT_Report.pdf";
+            a.download = "APSIT_Experiment.pdf";
             document.body.appendChild(a);
             a.click();
             a.remove();
 
-            status.innerText = "Download Complete!";
+            status.innerHTML = "✅ PDF generated successfully.<br><small>Your download has started.</small>";
 
         } else {
 
@@ -191,7 +191,7 @@ document.getElementById("reportForm").onsubmit = async function (e) {
 
     } catch (error) {
 
-        status.innerText = "Server Error.";
+        status.innerText = "⚠️ Something went wrong. Please try again."; 
 
     } finally {
 
@@ -213,5 +213,5 @@ function resetGenerateButton() {
 
     generateBtn.disabled = false;
     generateBtn.classList.remove("disabled-btn");
-    generateBtn.innerText = "Generate Report";
+    generateBtn.innerText = "⏳ Generating PDF...";
 }

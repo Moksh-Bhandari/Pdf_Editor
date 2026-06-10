@@ -1,5 +1,11 @@
+# =====================================================
+# IMPORTS
+# =====================================================
 import fitz  # PyMuPDF
 
+# =====================================================
+# MAIN PDF GENERATION ENGINE
+# =====================================================
 
 def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
     """
@@ -9,12 +15,14 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
     """
     try:
         doc = fitz.open(input_pdf)
+        # =====================================================
+        # PAGE LAYOUT CONSTANTS
+        # =====================================================
 
         HEADER_FLOOR = 145      # Everything above this remains untouched (Header protected)
         FOOTER_CEILING = 750    # Everything below this remains untouched (Footer protected)
 
         # =====================================================
-        # CHANGE 5.3
         # SAFE EDITABLE REGION
         # =====================================================
 
@@ -25,7 +33,6 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
         EDITABLE_BOTTOM = 730
 
         # =====================================================
-        # CHANGE 5.0 / 5.1
         # PREPARE CONTINUATION PAGE
         # =====================================================
 
@@ -49,7 +56,7 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
             return page
 
         # =====================================================
-        # Updated: Respect newlines + smart wrapping
+        # TEXT WRAPPING UTILITY
         # =====================================================
         def wrap_text(text, max_chars):
             if not text:
@@ -213,7 +220,7 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
             )
 
         # =====================================================
-        # change1.3 -> Inline Aim / Outcomes / Output
+        # Inline Aim / Outcomes / Output
         # =====================================================
         current_y = 272
 
@@ -361,14 +368,12 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
         )
         
         # ==================================================
-        # change 1.4
         # Remove blank pages after conclusion page
         # ==================================================
         while len(doc) - 1 > curr_p_idx:
             doc.delete_page(len(doc) - 1)
 
         # ======================================================
-        # change 4.3
         # ADVANCED PDF COMPRESSION
         # ======================================================
         doc.save(
@@ -379,9 +384,7 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
             deflate_images=True,
             deflate_fonts=True
         )
-        
-
-        # change 4.2
+        # ======================================================
         # CLOSE PDF DOCUMENT PROPERLY
         # ======================================================
         doc.close()

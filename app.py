@@ -1,18 +1,38 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks
-from fastapi.responses import HTMLResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
+# ======================================================
+# STANDARD LIBRARY
+# ======================================================
 
+import json
 import os
 import shutil
-import uuid
-import json
 import time
+import uuid
 
 # ======================================================
-# change 4.1
-# IMAGE OPTIMIZATION IMPORTS
+# THIRD-PARTY LIBRARIES
 # ======================================================
+
 from PIL import Image
+
+from fastapi import (
+    BackgroundTasks,
+    FastAPI,
+    File,
+    Form,
+    HTTPException,
+    UploadFile,
+)
+
+from fastapi.responses import (
+    FileResponse,
+    HTMLResponse,
+)
+
+from fastapi.staticfiles import StaticFiles
+
+# ======================================================
+# LOCAL IMPORTS
+# ======================================================
 
 from core.master_engine import finalize_portfolio_report
 
@@ -39,14 +59,12 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # ======================================================
-# change 3.1
 # FILE SIZE LIMITS
 # ======================================================
 MAX_PDF_SIZE = 20 * 1024 * 1024      # 20 MB
 MAX_IMAGE_SIZE = 10 * 1024 * 1024    # 10 MB
 
 # ======================================================
-# change 4.1
 # IMAGE OPTIMIZATION ENGINE
 # ======================================================
 def optimize_image(input_path, output_path):
@@ -90,7 +108,6 @@ def optimize_image(input_path, output_path):
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # ======================================================
-# change 3.4.2
 # AUTO DELETE AFTER 1 MINUTE WITH RETRY
 # ======================================================
 def delete_after_delay(files_list):
@@ -142,7 +159,7 @@ async def home():
         raise HTTPException(status_code=500, detail=str(e))
 
 # ======================================================
-# GENERATE REPORT
+# GENERATE PDF
 # ======================================================
 @app.post("/generate-report")
 async def generate_report(
@@ -155,7 +172,7 @@ async def generate_report(
     try:
 
         # ======================================================
-        # Parse JSON Data
+        # Parse student information submitted from frontend
         # ======================================================
         data = json.loads(student_data)
 
@@ -202,7 +219,6 @@ async def generate_report(
         pdf_file.file.close()
 
         # ======================================================
-        # change 4.1
         # SAVE + OPTIMIZE IMAGES
         # ======================================================
         image_paths = []
@@ -261,7 +277,7 @@ async def generate_report(
         print("Total Images Received:", len(image_paths))
 
         # ======================================================
-        # Output Path
+        # Prepare output PDF filename
         # ======================================================
         exp_no = data.get("exp_no", "X")
 
@@ -283,7 +299,6 @@ async def generate_report(
         )
 
         # ======================================================
-        # change 4.1
         # DELETE ORIGINAL + OPTIMIZED FILES
         # ======================================================
         files_to_delete = [pdf_path, output_path]
@@ -306,7 +321,6 @@ async def generate_report(
                 files_to_delete.append(optimized_path)
 
         # ======================================================
-        # change 2.1
         # AUTO DELETE TASK
         # ======================================================
         background_tasks.add_task(
@@ -315,7 +329,7 @@ async def generate_report(
         )
 
         # ======================================================
-        # Return PDF
+        # Return generated PDF to user
         # ======================================================
         return FileResponse(
             path=output_path,
@@ -323,12 +337,14 @@ async def generate_report(
             filename=output_filename
         )
 
-    except Exception as e:
+    except HTTPException:
+        raise
 
+    except Exception as e:
         raise HTTPException(
-            status_code=500,
-            detail=str(e)
-        )
+        status_code=500,
+        detail="Internal Server Error"
+    )
 
 # ======================================================
 # RUN SERVER DIRECTLY

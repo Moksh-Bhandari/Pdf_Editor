@@ -1,8 +1,7 @@
 let selectedImages = [];
 
 // ======================================================
-// change 3.3.3
-// REQUEST LOCK
+// REQUEST STATE MANAGEMENT
 // ======================================================
 let isGenerating = false;
 
@@ -73,7 +72,6 @@ document.getElementById("reportForm").onsubmit = async function (e) {
     e.preventDefault();
 
     // ======================================================
-    // change 3.3.3
     // BLOCK MULTIPLE CLICKS
     // ======================================================
     if (isGenerating) {
@@ -85,12 +83,11 @@ document.getElementById("reportForm").onsubmit = async function (e) {
     const status = document.getElementById("status");
 
     // ======================================================
-    // change 3.3.3
     // START LOADING STATE
     // ======================================================
     generateBtn.disabled = true;
     generateBtn.classList.add("disabled-btn");
-    generateBtn.innerText = "Generating PDF...";
+    generateBtn.innerText = "⏳ Generating PDF...";
 
 
     const formData = new FormData();
@@ -130,7 +127,6 @@ document.getElementById("reportForm").onsubmit = async function (e) {
     }
 
     // ======================================================
-    // change 3.1 updated
     // FILE SIZE VALIDATION
     // ======================================================
     const MAX_PDF_SIZE = 20 * 1024 * 1024; // 20 MB
@@ -196,7 +192,6 @@ document.getElementById("reportForm").onsubmit = async function (e) {
     } finally {
 
         // ======================================================
-        // change 3.3.3
         // ALWAYS RESTORE BUTTON
         // ======================================================
         resetGenerateButton();
@@ -204,7 +199,6 @@ document.getElementById("reportForm").onsubmit = async function (e) {
 };
 
 // ======================================================
-// change 3.3.3
 // RESET BUTTON FUNCTION
 // ======================================================
 function resetGenerateButton() {
@@ -213,5 +207,5 @@ function resetGenerateButton() {
 
     generateBtn.disabled = false;
     generateBtn.classList.remove("disabled-btn");
-    generateBtn.innerText = "⏳ Generating PDF...";
+    generateBtn.innerText = "Generate PDF";
 }

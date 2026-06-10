@@ -102,6 +102,7 @@ button{
 
 button:hover{
     background:var(--blue-dark);
+    transform:translateY(-1px);
 }
 
 button:active{
@@ -136,7 +137,7 @@ button:active{
 }
 
 .file-item:hover{
-    transform:translateY(-2px);
+    box-shadow:0 4px 10px rgba(0,0,0,.06);
 }
 
 .remove-btn{
@@ -155,7 +156,6 @@ button:active{
 }
 
 /* ======================================================
-   change 5.1
    MOBILE RESPONSIVE IMPROVEMENTS
 ====================================================== */
 
@@ -221,7 +221,6 @@ button:active{
     }
 }
 /* ======================================================
-   change 3.3.3
    DISABLED BUTTON STYLE
 ====================================================== */
 

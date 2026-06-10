@@ -1,114 +1,183 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ========================================= -->
+    <!-- PAGE TITLE -->
+    <!-- ========================================= -->
     <title>APSIT Lab PDF Generator</title>
+
+    <!-- ========================================= -->
+    <!-- STYLESHEET -->
+    <!-- ========================================= -->
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
+
 <body>
 
-<div class="container">
+    <!-- ========================================= -->
+    <!-- MAIN CONTAINER -->
+    <!-- ========================================= -->
+    <div class="container">
 
-    <h1>APSIT LAB PDF Generator</h1>
+        <!-- ========================================= -->
+        <!-- APPLICATION TITLE -->
+        <!-- ========================================= -->
+        <h1>APSIT LAB PDF Generator</h1>
 
-    <form id="reportForm">
+        <!-- ========================================= -->
+        <!-- REPORT FORM -->
+        <!-- ========================================= -->
+        <form id="reportForm">
 
-        <div class="grid">
+            <div class="grid">
 
-            <div class="form-group">
-                <label>Academic Year</label>
-                <input type="text" id="year" value="2025-26">
+                <!-- ========================================= -->
+                <!-- ACADEMIC DETAILS -->
+                <!-- ========================================= -->
+
+                <div class="form-group">
+                    <label>Academic Year</label>
+                    <input type="text" id="year" value="2025-26">
+                </div>
+
+                <div class="form-group">
+                    <label>Semester</label>
+                    <input type="text" id="sem" value="IV">
+                </div>
+
+                <div class="form-group">
+                    <label>Class / Div / Branch</label>
+                    <input type="text" id="class" placeholder="S.E./ A / CSE">
+                </div>
+
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" id="subject" placeholder="DBMS Lab">
+                </div>
+
+                <div class="form-group">
+                    <label>Instructor</label>
+                    <input type="text" id="instructor" placeholder="Enter name">
+                </div>
+
+                <div class="form-group">
+                    <label>Experiment No.</label>
+                    <input type="text" id="exp_no" placeholder="1">
+                </div>
+
+                <!-- ========================================= -->
+                <!-- STUDENT DETAILS -->
+                <!-- ========================================= -->
+
+                <div class="form-group">
+                    <label>Student Name</label>
+                    <input type="text" id="name" placeholder="Student Name">
+                </div>
+
+                <div class="form-group">
+                    <label>Student ID</label>
+                    <input type="text" id="id" placeholder="2410XXXX">
+                </div>
+
+                <div class="form-group">
+                    <label>Roll No.</label>
+                    <input type="text" id="roll" placeholder="45">
+                </div>
+
+                <!-- ========================================= -->
+                <!-- DATE DETAILS -->
+                <!-- ========================================= -->
+
+                <div class="form-group">
+                    <label>Date of Performance</label>
+                    <input type="date" id="p_date">
+                </div>
+
+                <div class="form-group">
+                    <label>Date of Submission</label>
+                    <input type="date" id="s_date">
+                </div>
+
+                <!-- ========================================= -->
+                <!-- TEMPLATE PDF -->
+                <!-- ========================================= -->
+
+                <div class="form-group full-width">
+                    <label>Upload an APSIT Template PDF</label>
+                    <input
+                        type="file"
+                        id="pdf_file"
+                        accept=".pdf"
+                        required>
+                </div>
+
+                <!-- ========================================= -->
+                <!-- AIM -->
+                <!-- ========================================= -->
+
+                <div class="form-group full-width">
+                    <label>Aim</label>
+                    <textarea id="aim"></textarea>
+                </div>
+
+                <!-- ========================================= -->
+                <!-- LAB OUTCOMES -->
+                <!-- ========================================= -->
+
+                <div class="form-group full-width">
+                    <label>Lab Outcomes</label>
+                    <textarea id="outcomes"></textarea>
+                </div>
+
+                <!-- ========================================= -->
+                <!-- CONCLUSION -->
+                <!-- ========================================= -->
+
+                <div class="form-group full-width">
+                    <label>Conclusion</label>
+                    <textarea id="conclusion"></textarea>
+                </div>
+
+                <!-- ========================================= -->
+                <!-- OUTPUT IMAGES -->
+                <!-- ========================================= -->
+
+                <div class="form-group full-width">
+                    <label>Upload Output Images</label>
+
+                    <input
+                        type="file"
+                        id="images"
+                        multiple
+                        accept="image/*">
+
+                    <div id="fileList"></div>
+                </div>
+
             </div>
 
-            <div class="form-group">
-                <label>Semester</label>
-                <input type="text" id="sem" value="IV">
-            </div>
+            <!-- ========================================= -->
+            <!-- SUBMIT BUTTON -->
+            <!-- ========================================= -->
 
-            <div class="form-group">
-                <label>Class / Div / Branch</label>
-                <input type="text" id="class" placeholder="S.E./ A / CSE">
-            </div>
+            <button type="submit" id="generateBtn">
+                Generate PDF
+            </button>
 
-            <div class="form-group">
-                <label>Subject</label>
-                <input type="text" id="subject" placeholder="DBMS Lab">
-            </div>
+        </form>
 
-            <div class="form-group">
-                <label>Instructor</label>
-                <input type="text" id="instructor" placeholder="Enter name">
-            </div>
+        <!-- STATUS MESSAGE -->
+        <div id="status"></div>
 
-            <div class="form-group">
-                <label>Experiment No.</label>
-                <input type="text" id="exp_no" placeholder="1">
-            </div>
+    </div>
 
-            <div class="form-group">
-                <label>Student Name</label>
-                <input type="text" id="name" placeholder="Student Name">
-            </div>
+    <!-- JAVASCRIPT -->
+    <script src="/static/js/main.js"></script>
 
-            <div class="form-group">
-                <label>Student ID</label>
-                <input type="text" id="id" placeholder="2410XXXX">
-            </div>
-
-            <div class="form-group">
-                <label>Roll No.</label>
-                <input type="text" id="roll" placeholder="45">
-            </div>
-
-            <div class="form-group">
-                <label>Date of Performance</label>
-                <input type="date" id="p_date">
-            </div>
-
-            <div class="form-group">
-                <label>Date of Submission</label>
-                <input type="date" id="s_date">
-            </div>
-
-            <div class="form-group full-width">
-                <label>Upload an APSIT Template PDF</label>
-                <input type="file" id="pdf_file" accept=".pdf" required>
-            </div>
-
-            <div class="form-group full-width">
-                <label>Aim</label>
-                <textarea id="aim"></textarea>
-            </div>
-
-            <div class="form-group full-width">
-                <label>Lab Outcomes</label>
-                <textarea id="outcomes"></textarea>
-            </div>
-
-            <div class="form-group full-width">
-                <label>Conclusion</label>
-                <textarea id="conclusion"></textarea>
-            </div>
-
-            <div class="form-group full-width">
-                <label>Upload Output Images</label>
-                <input type="file" id="images" multiple accept="image/*">
-                <div id="fileList"></div>
-            </div>
-
-        </div>
-
-        <button type="submit" id="generateBtn">
-         Generate PDF
-        </button>
-
-    </form>
-
-    <div id="status"></div>
-
-</div>
-
-<script src="/static/js/main.js"></script>
 </body>
+
 </html>

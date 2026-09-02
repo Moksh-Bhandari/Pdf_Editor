@@ -58,32 +58,66 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
         # =====================================================
         # TEXT WRAPPING UTILITY
         # =====================================================
-        def wrap_text(text, max_chars):
+        def wrap_text(text, max_width, fontname="tiro", fontsize=11):
+            """
+            Wrap text according to its actual rendered PDF width.
+
+            Unlike character-based wrapping, this measures the text using
+            the selected PyMuPDF font and font size. This prevents
+            unnecessary line breaks caused by proportional font widths.
+
+            Manual line breaks entered by the user are preserved.
+            """
+
             if not text:
                 return []
-            # Split by paragraphs (double newlines or single newlines)
-            paragraphs = str(text).replace('\r\n', '\n').split('\n')
+
+            paragraphs = str(text).replace("\r\n", "\n").split("\n")
             lines = []
-            
-            for para in paragraphs:
-                if not para.strip():
-                    lines.append("")  # Preserve blank lines
+
+            # Create the font once instead of repeatedly creating it.
+            font = fitz.Font(fontname)
+
+            for paragraph in paragraphs:
+
+                # Preserve intentionally blank lines.
+                if not paragraph.strip():
+                    lines.append("")
                     continue
-                    
-                words = para.split()
-                current = ""
-                
+
+                words = paragraph.split()
+                current_line = ""
+
                 for word in words:
-                    trial = word if current == "" else current + " " + word
-                    if len(trial) <= max_chars:
-                        current = trial
+
+                    trial = (
+                        word
+                        if not current_line
+                        else current_line + " " + word
+                    )
+
+                    # Measure the actual rendered width.
+                    trial_width = font.text_length(
+                        trial,
+                        fontsize=fontsize
+                    )
+
+                    if trial_width <= max_width:
+                        current_line = trial
+
                     else:
-                        if current:
-                            lines.append(current)
-                        current = word
-                if current:
-                    lines.append(current)
-            
+                        # Current line is complete.
+                        if current_line:
+                            lines.append(current_line)
+
+                        # Start the next line with the word
+                        # that did not fit.
+                        current_line = word
+
+                # Add the final line of the paragraph.
+                if current_line:
+                    lines.append(current_line)
+
             return lines
 
         # =====================================================
@@ -232,7 +266,12 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
             fontname="tibo",
         )
 
-        aim_lines = wrap_text(data["aim"], 78)
+        aim_lines = wrap_text(
+            data["aim"],
+            max_width=565 - 78,
+            fontname="tiro",
+            fontsize=11,
+        )
 
         for line in aim_lines:
             x_pos = 78
@@ -254,7 +293,12 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
             fontname="tibo",
         )
 
-        out_lines = wrap_text(data["outcomes"], 66)
+        out_lines = wrap_text(
+            data["outcomes"],
+            max_width=565 - 130,
+            fontname="tiro",
+            fontsize=11,
+        )
 
         for line in out_lines:
             page1.insert_text(
@@ -318,7 +362,9 @@ def finalize_portfolio_report(input_pdf, output_pdf, data, image_paths):
 
         conclusion_lines = wrap_text(
             data.get("conclusion", ""),
-            65
+            max_width=550 - 110,
+            fontname="tiro",
+            fontsize=11,
         )
 
         required_height = (
